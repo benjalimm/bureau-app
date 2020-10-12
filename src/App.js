@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { FreeCamera, Vector3, HemisphericLight, MeshBuilder } from '@babylonjs/core';
 import SceneComponent from './app/components/SceneComponent'; // uses above component in same directory
 // import SceneComponent from 'babylonjs-hook'; // if you install 'babylonjs-hook' NPM.
 import './App.scss';
+import MainGame  from './game/MainGame';
 
 let box;
 
@@ -45,12 +46,12 @@ const onRender = scene => {
     box.rotation.y += ((rpm / 60) * Math.PI * 2 * (deltaTimeInMillis / 1000));
   }
 }
+
 function App() {
   return (
     <div>
-        <SceneComponent className="scene" antialias onSceneReady={onSceneReady} onRender={onRender} id='my-canvas' />
+      <SceneComponent className="scene" antialias onSceneReady={onSceneReady} onRender={onRender} id='my-canvas' />
     </div>
-  );
+  )
 }
-
 export default App;

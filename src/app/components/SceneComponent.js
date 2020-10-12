@@ -1,7 +1,7 @@
 import { Engine, Scene } from '@babylonjs/core'
 import React, { useEffect, useRef } from 'react'
 
-export default function SceneComponent(props) {
+export default (props) => {
     const reactCanvas = useRef(null);
     const { antialias, engineOptions, adaptToDeviceRatio, sceneOptions, onRender, onSceneReady, ...rest } = props;
 
