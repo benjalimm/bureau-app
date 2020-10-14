@@ -1,44 +1,34 @@
-import { Engine, Scene } from '@babylonjs/core'
+import { Engine, Scene, MeshBuilder } from '@babylonjs/core'
 import React, { useEffect, useRef } from 'react'
-
+import shared from '../../shared'
 export default (props) => {
     const reactCanvas = useRef(null);
-    const { antialias, engineOptions, adaptToDeviceRatio, sceneOptions, onRender, onSceneReady, ...rest } = props;
-
+    const { antialias, engineOptions, adaptToDeviceRatio, sceneOptions, ...rest } = props;
+    const { game } = shared
     useEffect(() => {
         if (reactCanvas.current) {
             const engine = new Engine(reactCanvas.current, antialias, engineOptions, adaptToDeviceRatio);
             const scene = new Scene(engine, sceneOptions);
-            if (scene.isReady()) {
-                props.onSceneReady(scene)
-            } else {
-                scene.onReadyObservable.addOnce(scene => props.onSceneReady(scene));
-            }
+            game.initialize(scene, engine)
 
-            engine.runRenderLoop(() => {
-                if (typeof onRender === 'function') {
-                    onRender(scene);
-                }
-                scene.render();
-            })
 
-            const resize = () => {
-                scene.getEngine().resize();
-            }
-
+          
             if (window) {
-                window.addEventListener('resize', resize);
+              // -- WINDOW LISTENERS 
+              window.addEventListener('resize', () => {
+                game.onResize(scene)
+              });
+
+              window.addEventListener("click", () => {
+                game.onClick(scene)
+              })
             }
 
             return () => {
                 scene.getEngine().dispose();
-
-                if (window) {
-                    window.removeEventListener('resize', resize);
-                }
             }
         }
-    }, [adaptToDeviceRatio, antialias, engineOptions, onRender, props, reactCanvas, sceneOptions])
+    }, [adaptToDeviceRatio, antialias, engineOptions, game, props, reactCanvas, sceneOptions])
 
     return (
         <canvas ref={reactCanvas} {...rest} />
