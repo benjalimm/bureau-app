@@ -1,4 +1,4 @@
-import { FreeCamera, Vector3, HemisphericLight, MeshBuilder, Scene, Engine, Mesh } from '@babylonjs/core';
+import { FreeCamera, Vector3, HemisphericLight, MeshBuilder, Scene, Engine, Mesh, PickingInfo, Color4 } from '@babylonjs/core';
 
 export default class MainGame {
 box?: Mesh;
@@ -9,11 +9,15 @@ engine?: Engine;
   public initialize(scene: Scene, engine: Engine) {
     this.scene = scene 
     this.engine = engine
-    
-    this.camera = new FreeCamera("camera1", new Vector3(0, 5, -10), this.scene!)
+    this.camera = new FreeCamera("camera1", new Vector3(0, 5, -10), scene)
     
     this.prepareScene(scene)
     this.startRenderLoop(engine, scene)
+    this.onPointHover(scene , (pickResult) => {
+      if (pickResult?.pickedPoint) {
+        this.drawCicleAtPoint(pickResult!.pickedPoint!)
+      }
+    })
   }
 
   private startRenderLoop(engine: Engine, scene: Scene) {
@@ -30,7 +34,6 @@ engine?: Engine;
         scene.onReadyObservable.addOnce(scene => this.onSceneReady(scene));
     }
   }
-  
 
   private onRender(scene: Scene) {
     if (this.box !== undefined) {
@@ -63,7 +66,7 @@ engine?: Engine;
     box.position.y = 1;
 
     // Our built-in 'ground' shape.
-    MeshBuilder.CreateGround("ground", {width: 6, height: 6}, scene);
+    MeshBuilder.CreateGround("ground", {width: 200, height: 200}, scene);
   }
 
   public onResize(scene: Scene) {
@@ -74,12 +77,39 @@ engine?: Engine;
     const pickResult = scene.pick(scene.pointerX, scene.pointerY);
     console.log(pickResult)
     
-    if (pickResult) {
+    if (pickResult?.pickedPoint) {
       let box1 = scene.getMeshByName("box")
-      box1!.position.x = pickResult!.pickedPoint!.x
-      box1!.position.z = pickResult!.pickedPoint!.z
-    }
+      box1!.position.x = pickResult!.pickedPoint!.x 
+      box1!.position.z = pickResult!.pickedPoint!.z 
+    }  
+  }
 
+  private onPointHover(scene: Scene, onHover: (result: PickingInfo | null) => (void)) {
+    setInterval(() => {
+      const pickResult = scene.pick(scene.pointerX, scene.pointerY);
+      if (pickResult) {
+        onHover(pickResult)
+      } else {
+        onHover(null)
+      }
+    }, 10)
+  }
+
+  private drawCicleAtPoint(point: Vector3) {
+    const radius = 1
+    var lines = MeshBuilder.CreateDashedLines("lines", {
+      points: [
+        new Vector3(point.x - radius, 0, point.z + radius),
+        new Vector3(point.x + radius, 0, point.z + radius),
+        new Vector3(point.x + radius, 0, point.z - radius),
+        new Vector3(point.x - radius, 0, point.z - radius),
+        new Vector3(point.x - radius, 0, point.z + radius),
+      ]
+      
+    })
+    setTimeout(() => {
+      lines.dispose()
+    } ,10)
     
   }
 

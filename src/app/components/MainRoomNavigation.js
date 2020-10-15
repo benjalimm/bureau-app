@@ -9,7 +9,7 @@ const NavigationHeader = (props) => {
 
   return (
     <div className="header-container">
-      <h3>Bureau's office</h3>
+      <h1 className="header-text">Bureau's office</h1>
     </div>
   )
 }
@@ -20,6 +20,6 @@ export default function MainRoomNavigation(props) {
 
   }, [])
   return <div className="main">
-    <NavigationHeader/>
+    <h1 className="header-text">Bureau's office</h1>
   </div>
 }

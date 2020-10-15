@@ -5,13 +5,13 @@ export default (props) => {
     const reactCanvas = useRef(null);
     const { antialias, engineOptions, adaptToDeviceRatio, sceneOptions, ...rest } = props;
     const { game } = shared
+    
     useEffect(() => {
         if (reactCanvas.current) {
+
             const engine = new Engine(reactCanvas.current, antialias, engineOptions, adaptToDeviceRatio);
             const scene = new Scene(engine, sceneOptions);
             game.initialize(scene, engine)
-
-
           
             if (window) {
               // -- WINDOW LISTENERS 

@@ -1,15 +1,17 @@
 .main {
-  background-color: lightgray;
-  width: 30%;
-  display: flex;
-  align-items: flex-start; 
-  .h3 {
-    text-align: center;
-  }
+  background-color: white;
+  border: solid green 3px;
+  border-radius: 25px;
+  
+}
+
+.header-text {
+  margin-left: 20px;
+  border: solid green 3px;
 }
 
 .header-container {
   height: 150px;
   width: 100%;
-  background-color: lightgreen;
+  background-color: lightgray;
 }
