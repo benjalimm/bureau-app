@@ -1,17 +1,14 @@
 .main {
-  background-color: white;
+  background-color: #F1F1F1;
   border: solid green 3px;
   border-radius: 25px;
-  
+  display: block;
+  justify-content: flex-start;
 }
 
 .header-text {
   margin-left: 20px;
-  border: solid green 3px;
+  border: solid clear 3px;
+  
 }
 
-.header-container {
-  height: 150px;
-  width: 100%;
-  background-color: lightgray;
-}

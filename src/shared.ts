@@ -1,5 +1,5 @@
-import MainGame from "./game/MainGame";
+import MainGame from './game/MainGame';
 
 export default {
   game: new MainGame()
-}
+};

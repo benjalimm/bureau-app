@@ -1,36 +1,36 @@
 import { Engine, Scene, MeshBuilder } from '@babylonjs/core'
 import React, { useEffect, useRef } from 'react'
 import shared from '../../shared'
-export default (props) => {
-    const reactCanvas = useRef(null);
-    const { antialias, engineOptions, adaptToDeviceRatio, sceneOptions, ...rest } = props;
-    const { game } = shared
-    
-    useEffect(() => {
-        if (reactCanvas.current) {
+const SceneComponent = (props) => {
+  const reactCanvas = useRef(null)
+  const { antialias, engineOptions, adaptToDeviceRatio, sceneOptions, ...rest } = props
+  const { game } = shared
 
-            const engine = new Engine(reactCanvas.current, antialias, engineOptions, adaptToDeviceRatio);
-            const scene = new Scene(engine, sceneOptions);
-            game.initialize(scene, engine)
-          
-            if (window) {
-              // -- WINDOW LISTENERS 
-              window.addEventListener('resize', () => {
-                game.onResize(scene)
-              });
+  useEffect(() => {
+    if (reactCanvas.current) {
+      const engine = new Engine(reactCanvas.current, antialias, engineOptions, adaptToDeviceRatio)
+      const scene = new Scene(engine, sceneOptions)
+      game.initialize(scene, engine)
 
-              window.addEventListener("click", () => {
-                game.onClick(scene)
-              })
-            }
+      if (window) {
+        // -- WINDOW LISTENERS
+        window.addEventListener('resize', () => {
+          game.onResize(scene)
+        })
 
-            return () => {
-                scene.getEngine().dispose();
-            }
-        }
-    }, [adaptToDeviceRatio, antialias, engineOptions, game, props, reactCanvas, sceneOptions])
+        window.addEventListener('click', () => {
+          game.onClick(scene)
+        })
+      }
 
-    return (
-        <canvas ref={reactCanvas} {...rest} />
-    );
+      return () => {
+        scene.getEngine().dispose()
+      }
+    }
+  }, [adaptToDeviceRatio, antialias, engineOptions, game, props, reactCanvas, sceneOptions])
+
+  return (
+    <canvas ref={reactCanvas} {...rest} />
+  )
 }
+export default SceneComponent

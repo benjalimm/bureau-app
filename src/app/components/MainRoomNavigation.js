@@ -1,21 +1,11 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import './MainRoomNavigation.scss'
 
-
-const NavigationHeader = (props) => {
-  useEffect(() => {
-
-  }, [])
-
-  return (
-    <div className="header-container">
-      <h1 className="header-text">Bureau's office</h1>
-    </div>
-  )
-}
-
-export default function MainRoomNavigation(props) {
-  
+export default function MainRoomNavigation (props) {
+  const [joined, setJoined] = useState(false)
+  const channelRef = useRef('')
+  const remoteRef = useRef('')
+  const leaveRef = useRef('')
   useEffect(() => {
 
   }, [])
