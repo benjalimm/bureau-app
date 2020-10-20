@@ -1,4 +1,4 @@
-import { FreeCamera, Vector3, HemisphericLight, MeshBuilder, Scene, Engine, Mesh, PickingInfo, AssetsManager, SceneLoader, Color3, StandardMaterial, AbstractMesh } from '@babylonjs/core'
+import { FreeCamera, Vector3, HemisphericLight, MeshBuilder, Scene, Engine, Mesh, PickingInfo, AssetsManager, SceneLoader, Color3, StandardMaterial, AbstractMesh, AnimationGroup, Skeleton, Animation } from '@babylonjs/core'
 
 export default class MainGame {
 box?: AbstractMesh;
@@ -67,11 +67,8 @@ private async onSceneReady (scene: Scene) {
   light.intensity = 0.7
 
   // Our built-in 'box' shape.
-  this.box = MeshBuilder.CreateBox('box', { size: 2 }, this.scene) // Move the box upward 1/2 its height
-
-  const avatar = await this.setObjectOnGround("Suit_Male.babylon", 10, 20, null)
-  avatar.createAnimationRange("Idle", 130, 230)
-  avatar.beginAnimation("Idle", true)
+  this.box = await this.setObjectOnGround("/assets/","Suit_Male.babylon", 10, 20, null)
+  this.box.beginAnimation("Walk", true)
 
   // Our built-in 'ground' shape.
   MeshBuilder.CreateGround('ground', { width: 200, height: 200 }, scene)
@@ -102,30 +99,37 @@ private async onSceneReady (scene: Scene) {
   
 }
 
-public onResize (scene: Scene) {
-  scene.getEngine().resize()
-}
-
-public onClick (scene: Scene) {
-  const pickResult = scene.pick(scene.pointerX, scene.pointerY)
-  console.log(pickResult)
-
-  if (pickResult?.pickedPoint) {
-      this.box!.position.x = pickResult!.pickedPoint!.x
-      this.box!.position.z = pickResult!.pickedPoint!.z
+  public onResize (scene: Scene) {
+    scene.getEngine().resize()
   }
-}
 
-private onPointHover (scene: Scene, onHover: (result: PickingInfo | null) => (void)) {
-  setInterval(() => {
+  public onClick (scene: Scene) {
     const pickResult = scene.pick(scene.pointerX, scene.pointerY)
-    if (pickResult) {
-      onHover(pickResult)
-    } else {
-      onHover(null)
+    console.log(pickResult)
+
+    if (pickResult?.pickedPoint) {
+      const pickedPoint = pickResult!.pickedPoint!
+        this.box!.position.x = pickResult!.pickedPoint!.x
+        this.box!.position.z = pickResult!.pickedPoint!.z
+        
     }
-  }, 10)
-}
+  }
+
+  private walk(toVector: Vector3) {
+    // const walkingAnimation = new Animation("animPos", "position", 30)
+    this.box!.moveWithCollisions(toVector)
+  }
+
+  private onPointHover (scene: Scene, onHover: (result: PickingInfo | null) => (void)) {
+    setInterval(() => {
+      const pickResult = scene.pick(scene.pointerX, scene.pointerY)
+      if (pickResult) {
+        onHover(pickResult)
+      } else {
+        onHover(null)
+      }
+    }, 10)
+  }
 
   private drawCicleAtPoint (point: Vector3) {
     const radius = 1
@@ -144,11 +148,13 @@ private onPointHover (scene: Scene, onHover: (result: PickingInfo | null) => (vo
       }, 10)
   }
 
-  public setObjectOnGround(name: string, xPosition: number, zPosition: number, onProgress: ((percentage: number) => void) | null): Promise<AbstractMesh> {
+  public async setObjectOnGround(rootUrl: string, name: string, xPosition: number, zPosition: number, onProgress: ((percentage: number) => void) | null): Promise<AbstractMesh> {
     return new Promise((resolve, reject) => {
-      SceneLoader.ImportMesh("", "/assets/", name, this.scene!, (meshes) => {
+      SceneLoader.ImportMesh("", rootUrl, name, this.scene!, (meshes, particleSystem,skeleton, animationGroups) => {
+        
         const mesh = meshes[0]
         mesh.position = new Vector3(xPosition, this.groundYLevel, zPosition)
+        this.mergeSkeletonAnimationsWithMesh(mesh, skeleton[0]);
         resolve(mesh)
       },(progressEvent) => {
         if (onProgress !== null) {
@@ -161,9 +167,17 @@ private onPointHover (scene: Scene, onHover: (result: PickingInfo | null) => (vo
     })
   }
 
-  public foo(name: string, xPosition: number, zPosition: number, onProgress: ((percentage: number) => void) | null) {
 
-
-    
+  private async mergeSkeletonAnimationsWithMesh(
+    mesh: AbstractMesh, 
+    skeleton: Skeleton
+    ) {
+      const range = skeleton.getAnimationRanges()
+      range.forEach(animationRange => {
+        if (animationRange) {
+          mesh.createAnimationRange(animationRange!.name, animationRange!.from, animationRange!.to)
+        } 
+      })
   }
+
 } 
