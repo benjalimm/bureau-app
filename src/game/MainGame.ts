@@ -68,7 +68,7 @@ private async onSceneReady (scene: Scene) {
 
   // Our built-in 'box' shape.
   this.box = await this.setObjectOnGround("/assets/","Suit_Male.babylon", 10, 20, null)
-  this.box.beginAnimation("Walk", true)
+  this.box.beginAnimation("Idle", true)
 
   // Our built-in 'ground' shape.
   MeshBuilder.CreateGround('ground', { width: 200, height: 200 }, scene)
@@ -109,15 +109,38 @@ private async onSceneReady (scene: Scene) {
 
     if (pickResult?.pickedPoint) {
       const pickedPoint = pickResult!.pickedPoint!
-        this.box!.position.x = pickResult!.pickedPoint!.x
-        this.box!.position.z = pickResult!.pickedPoint!.z
-        
+      //   this.box!.position.x = pickResult!.pickedPoint!.x
+      //   this.box!.position.z = pickResult!.pickedPoint!.z
+        this.walk(pickedPoint)
     }
   }
 
   private walk(toVector: Vector3) {
-    // const walkingAnimation = new Animation("animPos", "position", 30)
-    this.box!.moveWithCollisions(toVector)
+
+    // 1. Get current location
+    const currentXPosition = this.box!.position.x;
+    const currentZPosition = this.box!.position.z;
+
+    // 2. Calculate distance 
+    const xDistance = Math.abs(currentXPosition - toVector.x!)
+    const zDistance = Math.abs(currentZPosition - toVector.z!)
+
+
+    this.box!.beginAnimation("Run", true)
+
+    var x = 0
+    var z = 0
+
+    const speedPerFrame = 0.05
+    this.scene!.registerAfterRender(() => {
+
+      // this.box!.position.x += -speedPerFrame
+      this.box!.position.z += -speedPerFrame
+    })
+
+
+    
+
   }
 
   private onPointHover (scene: Scene, onHover: (result: PickingInfo | null) => (void)) {
@@ -179,5 +202,6 @@ private async onSceneReady (scene: Scene) {
         } 
       })
   }
+
 
 } 
