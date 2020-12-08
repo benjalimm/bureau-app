@@ -1,4 +1,4 @@
-import { FreeCamera, Vector3, HemisphericLight, MeshBuilder, Scene, Engine, Mesh, PickingInfo, AssetsManager, SceneLoader, Color3, StandardMaterial, AbstractMesh, AnimationGroup, Skeleton, Animation } from '@babylonjs/core'
+import { FreeCamera, Vector3, HemisphericLight, MeshBuilder, Scene, Engine, Mesh, PickingInfo, AssetsManager, SceneLoader, Color3, Color4, StandardMaterial, AbstractMesh, AnimationGroup, Skeleton, Animation, _BabylonLoaderRegistered } from '@babylonjs/core'
 
 export default class MainGame {
 box?: AbstractMesh;
@@ -6,11 +6,10 @@ camera?: FreeCamera;
 scene?: Scene;
 engine?: Engine;
 assetsManager?: AssetsManager
-
 groundYLevel: number = 1
 
 
-public async initialize (scene: Scene, engine: Engine) {
+public async initialize(scene: Scene, engine: Engine) {
   this.scene = scene
   this.engine = engine
   this.camera = new FreeCamera('camera1', new Vector3(0, 5, -10), scene)
@@ -18,6 +17,8 @@ public async initialize (scene: Scene, engine: Engine) {
   engine.enableOfflineSupport = false;
   await this.prepareScene(scene)
   this.startRenderLoop(engine, scene)
+
+  /// Highlight the ground wherever you hover 
   this.onPointHover(scene, (pickResult) => {
     if (pickResult?.pickedPoint) {
       this.drawCicleAtPoint(pickResult!.pickedPoint!)
@@ -50,8 +51,6 @@ private onRender (scene: Scene) {
 }
 
 private async onSceneReady (scene: Scene) {
-  // This creates and positions a free camera (non-mesh)
-
   // This targets the camera to scene origin
   this.camera?.setTarget(Vector3.Zero())
 
@@ -64,14 +63,34 @@ private async onSceneReady (scene: Scene) {
   var light = new HemisphericLight('light', new Vector3(0, 1, 0), scene)
 
   // Default intensity is 1. Let's dim the light a small amount
-  light.intensity = 0.7
+  light.intensity = 0.4
+  
 
-  // Our built-in 'box' shape.
-  this.box = await this.setObjectOnGround("/assets/","Suit_Male.babylon", 10, 20, null)
-  this.box.beginAnimation("Idle", true)
+
+  const environmentMaterial = new StandardMaterial("env", scene)
+  environmentMaterial.diffuseColor = Color3.FromHexString("#FFF0D8")
+  scene.ambientColor = Color3.FromHexString("#FFF0D8")
+  scene.clearColor = new Color4(255/255, 240/255, 216/255, 1)
+
+  // this.box.beginAnimation("Idle", true)
+  this.box = MeshBuilder.CreateSphere("box", { diameter: 2 }, scene)
+  this.box.position = new Vector3(10, 2, 20);
+  const boxMaterial = new StandardMaterial("boxMaterial", scene)
+  boxMaterial.diffuseColor = Color3.FromHexString("#FFA1A1")
+  boxMaterial.emissiveColor = Color3.FromHexString("#FFA1A1")
+  boxMaterial.specularColor = Color3.FromHexString("#FFA1A1")
+  this.box.material = boxMaterial;
+
 
   // Our built-in 'ground' shape.
   MeshBuilder.CreateGround('ground', { width: 200, height: 200 }, scene)
+  const ground = scene.getMeshByID("ground")
+  const groundMaterial = new StandardMaterial("groundMat", scene)
+  groundMaterial.diffuseColor = Color3.FromHexString("#FFA561")
+  groundMaterial.emissiveColor = Color3.FromHexString("#FFA561")
+  groundMaterial.specularColor = Color3.FromHexString("#FFA561")
+
+  ground!.material = groundMaterial
 
   SceneLoader.ImportMesh("", "/assets/", "CoffeeTable.babylon", this.scene!, (meshes) => {
     console.log("Loaded meshes")
@@ -80,8 +99,8 @@ private async onSceneReady (scene: Scene) {
 
     var myMaterial = new StandardMaterial("myMaterial", scene);
     
-    myMaterial.diffuseColor = Color3.Blue()
-    myMaterial.specularColor = Color3.Blue()
+    myMaterial.diffuseColor = Color3.FromHexString("FFF0D8")
+    myMaterial.specularColor = Color3.FromHexString("FFF0D8")
     // myMaterial.emissiveColor = Color3.Blue()
     myMaterial.ambientColor = Color3.Red()
     
@@ -118,28 +137,25 @@ private async onSceneReady (scene: Scene) {
   private walk(toVector: Vector3) {
 
     // 1. Get current location
-    const currentXPosition = this.box!.position.x;
-    const currentZPosition = this.box!.position.z;
+    // const currentXPosition = this.box!.position.x;
+    // const currentZPosition = this.box!.position.z;
 
-    // 2. Calculate distance 
-    const xDistance = Math.abs(currentXPosition - toVector.x!)
-    const zDistance = Math.abs(currentZPosition - toVector.z!)
+    // // 2. Calculate distance 
+    // const xDistance = Math.abs(currentXPosition - toVector.x!)
+    // const zDistance = Math.abs(currentZPosition - toVector.z!)
 
+    // var x = 0
+    // var z = 0
 
-    this.box!.beginAnimation("Run", true)
+    // const speedPerFrame = 0.05
+    // this.scene!.registerAfterRender(() => {
 
-    var x = 0
-    var z = 0
+    //   // this.box!.position.x += -speedPerFrame
+    //   this.box!.position.z += speedPerFrame
+    // })
 
-    const speedPerFrame = 0.05
-    this.scene!.registerAfterRender(() => {
-
-      // this.box!.position.x += -speedPerFrame
-      this.box!.position.z += -speedPerFrame
-    })
-
-
-    
+    this.box!.position.x = toVector.x
+    this.box!.position.z = toVector.z
 
   }
 
